@@ -136,6 +136,47 @@ export default function Home() {
     setSelectedImage(0);
   }
 
+  function orderViaInstagram() {
+    if (!selectedProduct) return;
+
+    const message = `Assalam-o-Alaikum Zyvora 🌸
+
+I want to order this product:
+
+🛍️ Product: ${selectedProduct.name}
+💰 Price: PKR ${selectedProduct.price.toLocaleString()}
+🚚 Delivery: PKR ${selectedProduct.delivery.toLocaleString()}
+💵 Total: PKR ${(selectedProduct.price + selectedProduct.delivery).toLocaleString()}
+
+🎨 Available Colors: ${
+      selectedProduct.colors.length > 0
+        ? selectedProduct.colors.join(", ")
+        : "Please confirm available colors"
+    }
+
+📦 Please confirm availability and order details.
+
+Thank you!
+Zyvora Fashion Studio`;
+
+    navigator.clipboard
+      .writeText(message)
+      .then(() => {
+        window.open(
+          "https://ig.me/m/zyvora.fashion_studio",
+          "_blank",
+          "noopener,noreferrer"
+        );
+      })
+      .catch(() => {
+        window.open(
+          "https://ig.me/m/zyvora.fashion_studio",
+          "_blank",
+          "noopener,noreferrer"
+        );
+      });
+  }
+
   function closeProduct() {
     setSelectedProduct(null);
     setSelectedImage(0);
@@ -1177,19 +1218,18 @@ export default function Home() {
                 )}
 
                 <div className="mt-10">
-                  <a
-                    href={INSTAGRAM_URL}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={orderViaInstagram}
                     className="flex w-full items-center justify-center gap-3 rounded-full bg-[#f1e7dc] px-6 py-4 text-xs font-medium uppercase tracking-[0.17em] text-[#241914] transition hover:bg-white"
                   >
                     Order via Instagram
                     <ArrowRight size={16} />
-                  </a>
+                  </button>
 
                   <p className="mt-4 text-center text-[10px] leading-5 text-[#665850]">
-                    Contact us on Instagram for availability,
-                    color confirmation and order details.
+                    Order details will be copied automatically. Open Instagram
+                    and paste the message in our DM.
                   </p>
                 </div>
               </div>
