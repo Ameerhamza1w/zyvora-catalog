@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -28,6 +29,9 @@ type Product = {
 
 const INSTAGRAM_URL =
   "https://www.instagram.com/zyvora.fashion_studio/";
+
+const INSTAGRAM_DM_URL =
+  "https://ig.me/m/zyvora.fashion_studio";
 
 export default function Home() {
   const supabase = createClient();
@@ -91,7 +95,9 @@ export default function Home() {
       new Set(
         products
           .map((product) => product.category)
-          .filter((category): category is string => Boolean(category))
+          .filter(
+            (category): category is string => Boolean(category)
+          )
       )
     );
 
@@ -136,41 +142,105 @@ export default function Home() {
     setSelectedImage(0);
   }
 
+  /*
+   * =========================
+   * INSTAGRAM ORDER
+   * =========================
+   *
+   * Complete order details are copied first.
+   * Then Instagram DM is opened.
+   *
+   * Instagram does not allow a normal website
+   * to directly inject text into the DM box,
+   * so customer only needs to Paste the copied message.
+   */
   function orderViaInstagram() {
     if (!selectedProduct) return;
 
+    const total =
+      selectedProduct.price + selectedProduct.delivery;
+
     const message = `Assalam-o-Alaikum Zyvora 🌸
 
-I want to order this product:
+I would like to place an order.
 
-🛍️ Product: ${selectedProduct.name}
-💰 Price: PKR ${selectedProduct.price.toLocaleString()}
-🚚 Delivery: PKR ${selectedProduct.delivery.toLocaleString()}
-💵 Total: PKR ${(selectedProduct.price + selectedProduct.delivery).toLocaleString()}
+🛍️ ORDER DETAILS
+━━━━━━━━━━━━━━━━━━
 
-🎨 Available Colors: ${
+📦 Product:
+${selectedProduct.name}
+
+🏷️ Category:
+${selectedProduct.category}
+
+💰 Product Price:
+PKR ${selectedProduct.price.toLocaleString()}
+
+🚚 Delivery Charges:
+PKR ${selectedProduct.delivery.toLocaleString()}
+
+💵 Total Amount:
+PKR ${total.toLocaleString()}
+
+🎨 Available Colors:
+${
       selectedProduct.colors.length > 0
         ? selectedProduct.colors.join(", ")
         : "Please confirm available colors"
     }
 
-📦 Please confirm availability and order details.
+📝 Product Details:
+${
+      selectedProduct.description ||
+      "Please confirm product details."
+    }
 
-Thank you!
+━━━━━━━━━━━━━━━━━━
+
+Please confirm availability and guide me regarding the order.
+
+Thank you! 🌸
+
 Zyvora Fashion Studio`;
 
     navigator.clipboard
       .writeText(message)
       .then(() => {
         window.open(
-          "https://ig.me/m/zyvora.fashion_studio",
+          INSTAGRAM_DM_URL,
           "_blank",
           "noopener,noreferrer"
         );
       })
       .catch(() => {
+        const textarea =
+          document.createElement("textarea");
+
+        textarea.value = message;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        textarea.style.top = "0";
+        textarea.style.opacity = "0";
+
+        document.body.appendChild(textarea);
+
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(
+          0,
+          textarea.value.length
+        );
+
+        try {
+          document.execCommand("copy");
+        } catch (error) {
+          console.error("Copy failed:", error);
+        }
+
+        document.body.removeChild(textarea);
+
         window.open(
-          "https://ig.me/m/zyvora.fashion_studio",
+          INSTAGRAM_DM_URL,
           "_blank",
           "noopener,noreferrer"
         );
@@ -183,7 +253,10 @@ Zyvora Fashion Studio`;
   }
 
   function nextImage() {
-    if (!selectedProduct || selectedProduct.images.length === 0) {
+    if (
+      !selectedProduct ||
+      selectedProduct.images.length === 0
+    ) {
       return;
     }
 
@@ -195,7 +268,10 @@ Zyvora Fashion Studio`;
   }
 
   function previousImage() {
-    if (!selectedProduct || selectedProduct.images.length === 0) {
+    if (
+      !selectedProduct ||
+      selectedProduct.images.length === 0
+    ) {
       return;
     }
 
@@ -260,12 +336,18 @@ Zyvora Fashion Studio`;
       <header className="sticky top-0 z-40 border-b border-[#34251f]/80 bg-[#17110e]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
           <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              })
+            }
             className="group text-left"
           >
             <p className="text-[10px] uppercase tracking-[0.42em] text-[#a88969]">
               Fashion Studio
             </p>
+
             <h1 className="mt-1 text-xl sm:text-2xl font-light tracking-[0.18em]">
               ZYVORA
             </h1>
@@ -276,7 +358,9 @@ Zyvora Fashion Studio`;
               onClick={() =>
                 document
                   .getElementById("collection")
-                  ?.scrollIntoView({ behavior: "smooth" })
+                  ?.scrollIntoView({
+                    behavior: "smooth",
+                  })
               }
               className="transition hover:text-white"
             >
@@ -287,7 +371,9 @@ Zyvora Fashion Studio`;
               onClick={() =>
                 document
                   .getElementById("story")
-                  ?.scrollIntoView({ behavior: "smooth" })
+                  ?.scrollIntoView({
+                    behavior: "smooth",
+                  })
               }
               className="transition hover:text-white"
             >
@@ -334,6 +420,7 @@ Zyvora Fashion Studio`;
           <div>
             <div className="mb-7 flex items-center gap-3">
               <span className="h-px w-10 bg-[#a88969]" />
+
               <span className="text-[10px] uppercase tracking-[0.35em] text-[#b99a7a]">
                 The New Collection
               </span>
@@ -342,9 +429,11 @@ Zyvora Fashion Studio`;
             <h2 className="max-w-3xl text-5xl font-light leading-[0.95] tracking-[-0.04em] sm:text-6xl lg:text-8xl">
               Elegance
               <br />
+
               <span className="italic text-[#b99a7a]">
                 without
               </span>
+
               <br />
               effort.
             </h2>
@@ -361,6 +450,7 @@ Zyvora Fashion Studio`;
                 className="group flex items-center gap-3 rounded-full bg-[#f1e7dc] px-6 py-3.5 text-xs font-medium uppercase tracking-[0.15em] text-[#241914] transition hover:bg-white"
               >
                 Explore Collection
+
                 <ArrowRight
                   size={16}
                   className="transition-transform group-hover:translate-x-1"
@@ -382,6 +472,7 @@ Zyvora Fashion Studio`;
                 <p className="text-2xl font-light">
                   {products.length}
                 </p>
+
                 <p className="mt-1 text-[9px] uppercase tracking-[0.25em] text-[#756860]">
                   Pieces
                 </p>
@@ -395,6 +486,7 @@ Zyvora Fashion Studio`;
                     ? categories.length - 1
                     : 0}
                 </p>
+
                 <p className="mt-1 text-[9px] uppercase tracking-[0.25em] text-[#756860]">
                   Categories
                 </p>
@@ -406,12 +498,17 @@ Zyvora Fashion Studio`;
             {featuredProduct &&
             featuredProduct.images.length > 0 ? (
               <button
-                onClick={() => openProduct(featuredProduct)}
+                onClick={() =>
+                  openProduct(featuredProduct)
+                }
                 className="group relative block aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-[#3b2c25] bg-[#211813] text-left"
               >
                 <img
                   src={featuredProduct.images[0]}
                   alt={featuredProduct.name}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
                 />
 
@@ -447,9 +544,11 @@ Zyvora Fashion Studio`;
                     size={30}
                     className="mx-auto mb-5 text-[#8e725c]"
                   />
+
                   <p className="text-xs uppercase tracking-[0.3em] text-[#8e725c]">
                     Coming Soon
                   </p>
+
                   <p className="mt-3 text-sm text-[#776961]">
                     Our collection is being prepared.
                   </p>
@@ -458,6 +557,7 @@ Zyvora Fashion Studio`;
             )}
 
             <div className="absolute -bottom-5 -left-5 hidden h-24 w-24 rounded-full border border-[#4a382e] lg:block" />
+
             <div className="absolute -right-4 -top-4 hidden h-16 w-16 rounded-full border border-[#4a382e] lg:block" />
           </div>
         </div>
@@ -469,6 +569,7 @@ Zyvora Fashion Studio`;
           <span className="text-[9px] uppercase tracking-[0.35em]">
             Scroll
           </span>
+
           <ArrowDown size={15} />
         </button>
       </section>
@@ -485,6 +586,7 @@ Zyvora Fashion Studio`;
 
           <p className="text-2xl font-light leading-relaxed tracking-tight text-[#ded2ca] sm:text-4xl lg:text-5xl">
             "Fashion is not about being seen.
+
             <span className="italic text-[#b99a7a]">
               {" "}
               It is about being remembered."
@@ -520,13 +622,18 @@ Zyvora Fashion Studio`;
         {featuredProduct ? (
           <div className="grid gap-5 lg:grid-cols-2">
             <button
-              onClick={() => openProduct(featuredProduct)}
+              onClick={() =>
+                openProduct(featuredProduct)
+              }
               className="group relative aspect-[4/5] overflow-hidden rounded-[1.75rem] bg-[#211813] text-left"
             >
               {featuredProduct.images[0] ? (
                 <img
                   src={featuredProduct.images[0]}
                   alt={featuredProduct.name}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
                 />
               ) : (
@@ -553,7 +660,7 @@ Zyvora Fashion Studio`;
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
               {secondaryProducts.length > 0 ? (
-                secondaryProducts.map((product) => (
+                secondaryProducts.map((product, index) => (
                   <button
                     key={product.id}
                     onClick={() => openProduct(product)}
@@ -563,6 +670,8 @@ Zyvora Fashion Studio`;
                       <img
                         src={product.images[0]}
                         alt={product.name}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        decoding="async"
                         className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
                       />
                     ) : (
@@ -581,7 +690,8 @@ Zyvora Fashion Studio`;
                       </h3>
 
                       <p className="mt-1 text-sm text-[#ddd0c7]">
-                        PKR {product.price.toLocaleString()}
+                        PKR{" "}
+                        {product.price.toLocaleString()}
                       </p>
                     </div>
                   </button>
@@ -602,11 +712,14 @@ Zyvora Fashion Studio`;
                 size={28}
                 className="mx-auto mb-5 text-[#8e725c]"
               />
+
               <p className="text-xs uppercase tracking-[0.3em] text-[#8e725c]">
                 Collection Coming Soon
               </p>
+
               <p className="mt-3 text-sm text-[#756860]">
-                Products added from the catalog admin will appear here.
+                Products added from the catalog admin will appear
+                here.
               </p>
             </div>
           </div>
@@ -636,7 +749,9 @@ Zyvora Fashion Studio`;
               {categories.map((category) => (
                 <button
                   key={category}
-                  onClick={() => setActiveCategory(category)}
+                  onClick={() =>
+                    setActiveCategory(category)
+                  }
                   className={`whitespace-nowrap rounded-full border px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] transition ${
                     activeCategory === category
                       ? "border-[#f1e7dc] bg-[#f1e7dc] text-[#241914]"
@@ -690,7 +805,7 @@ Zyvora Fashion Studio`;
               </div>
             ) : (
               <div className="grid gap-x-5 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredProducts.map((product) => (
+                {filteredProducts.map((product, index) => (
                   <button
                     key={product.id}
                     onClick={() => openProduct(product)}
@@ -701,6 +816,17 @@ Zyvora Fashion Studio`;
                         <img
                           src={product.images[0]}
                           alt={product.name}
+                          loading={
+                            index < 3
+                              ? "eager"
+                              : "lazy"
+                          }
+                          decoding="async"
+                          fetchPriority={
+                            index < 3
+                              ? "high"
+                              : "auto"
+                          }
                           className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
                         />
                       ) : (
@@ -746,7 +872,8 @@ Zyvora Fashion Studio`;
                       </div>
 
                       <p className="text-sm text-[#c0a88f]">
-                        PKR {product.price.toLocaleString()}
+                        PKR{" "}
+                        {product.price.toLocaleString()}
                       </p>
                     </div>
                   </button>
@@ -767,6 +894,7 @@ Zyvora Fashion Studio`;
 
         <h2 className="mt-7 text-3xl font-light leading-tight sm:text-5xl">
           Designed for women who
+
           <span className="italic text-[#b99a7a]">
             {" "}
             define their own style.
@@ -787,6 +915,8 @@ Zyvora Fashion Studio`;
               <img
                 src={featuredProduct.images[0]}
                 alt="Zyvora"
+                loading="lazy"
+                decoding="async"
                 className="aspect-[4/5] h-full w-full object-cover"
               />
             ) : (
@@ -802,6 +932,7 @@ Zyvora Fashion Studio`;
             <h2 className="mt-4 text-4xl font-light leading-tight sm:text-5xl">
               Quiet luxury.
               <br />
+
               <span className="italic text-[#b99a7a]">
                 Everyday confidence.
               </span>
@@ -868,7 +999,7 @@ Zyvora Fashion Studio`;
 
         {products.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {products.slice(0, 4).map((product) => (
+            {products.slice(0, 4).map((product, index) => (
               <button
                 key={product.id}
                 onClick={() => openProduct(product)}
@@ -878,6 +1009,10 @@ Zyvora Fashion Studio`;
                   <img
                     src={product.images[0]}
                     alt={product.name}
+                    loading={
+                      index === 0 ? "eager" : "lazy"
+                    }
+                    decoding="async"
                     className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                   />
                 ) : (
@@ -910,9 +1045,11 @@ Zyvora Fashion Studio`;
                 size={28}
                 className="mx-auto mb-5 text-[#806653]"
               />
+
               <p className="text-xs uppercase tracking-[0.3em] text-[#8e725c]">
                 Visit Instagram
               </p>
+
               <p className="mt-3 text-sm text-[#756860]">
                 @zyvora.fashion_studio
               </p>
@@ -959,7 +1096,9 @@ Zyvora Fashion Studio`;
                   onClick={() =>
                     document
                       .getElementById("story")
-                      ?.scrollIntoView({ behavior: "smooth" })
+                      ?.scrollIntoView({
+                        behavior: "smooth",
+                      })
                   }
                   className="w-fit transition hover:text-white"
                 >
@@ -1036,12 +1175,17 @@ Zyvora Fashion Studio`;
             </div>
 
             <div className="mt-10 flex items-center gap-3 border-b border-[#49362c] pb-4">
-              <Search size={19} className="text-[#806653]" />
+              <Search
+                size={19}
+                className="text-[#806653]"
+              />
 
               <input
                 autoFocus
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
                 placeholder="Search products..."
                 className="w-full bg-transparent text-lg text-white outline-none placeholder:text-[#5f514a]"
               />
@@ -1071,6 +1215,8 @@ Zyvora Fashion Studio`;
                           <img
                             src={product.images[0]}
                             alt={product.name}
+                            loading="lazy"
+                            decoding="async"
                             className="h-full w-full object-cover"
                           />
                         )}
@@ -1087,7 +1233,8 @@ Zyvora Fashion Studio`;
                       </div>
 
                       <p className="text-sm text-[#c0a88f]">
-                        PKR {product.price.toLocaleString()}
+                        PKR{" "}
+                        {product.price.toLocaleString()}
                       </p>
                     </button>
                   ))}
@@ -1117,14 +1264,20 @@ Zyvora Fashion Studio`;
                   <>
                     <img
                       src={
-                        selectedProduct.images[selectedImage] ||
+                        selectedProduct.images[
+                          selectedImage
+                        ] ||
                         selectedProduct.images[0]
                       }
                       alt={selectedProduct.name}
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
                       className="aspect-[4/5] w-full object-cover lg:aspect-auto lg:h-full lg:min-h-[650px]"
                     />
 
-                    {selectedProduct.images.length > 1 && (
+                    {selectedProduct.images.length >
+                      1 && (
                       <>
                         <button
                           onClick={previousImage}
@@ -1142,19 +1295,24 @@ Zyvora Fashion Studio`;
                       </>
                     )}
 
-                    {selectedProduct.images.length > 1 && (
+                    {selectedProduct.images.length >
+                      1 && (
                       <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2">
-                        {selectedProduct.images.map((_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setSelectedImage(index)}
-                            className={`h-1.5 rounded-full transition-all ${
-                              selectedImage === index
-                                ? "w-7 bg-white"
-                                : "w-2 bg-white/40"
-                            }`}
-                          />
-                        ))}
+                        {selectedProduct.images.map(
+                          (_, index) => (
+                            <button
+                              key={index}
+                              onClick={() =>
+                                setSelectedImage(index)
+                              }
+                              className={`h-1.5 rounded-full transition-all ${
+                                selectedImage === index
+                                  ? "w-7 bg-white"
+                                  : "w-2 bg-white/40"
+                              }`}
+                            />
+                          )
+                        )}
                       </div>
                     )}
                   </>
@@ -1228,8 +1386,9 @@ Zyvora Fashion Studio`;
                   </button>
 
                   <p className="mt-4 text-center text-[10px] leading-5 text-[#665850]">
-                    Order details will be copied automatically. Open Instagram
-                    and paste the message in our DM.
+                    Complete order details will be copied
+                    automatically. Open Instagram and paste the
+                    message in our DM.
                   </p>
                 </div>
               </div>
